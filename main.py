@@ -1,7 +1,8 @@
 import chronological
 from gtts import gTTS
-import os
 import openai
+from base64 import b64decode
+import fileinput
 
 async def logic():
     # you call the Chronology functions, awaiting the ones that are marked await
@@ -13,18 +14,18 @@ async def logic():
     language = "fr"
     output = gTTS(text=myText, lang=language,slow=False)
     output.save("output.mp3")
-    os.system("start output.mp3")
     response = openai.Image.create(
     prompt=completion,
     n=1,
-    size="1024x1024"
+    size="1024x1024",
+    response_format="b64_json"
     )
-    image_url = response['data'][0]['url']
-    print(image_url)
+    image_b64 = response['data'][0]['b64_json']
+    with open('img.jpg', 'wb') as jpg:
+        jpg.write(b64decode(image_b64))
+
     with open('logs.txt', 'a') as f:
         f.write(prompt.splitlines()[3]+"\n")
         f.write(completion+"\n")
-        f.write(image_url+"\n")
-
 # invoke the Chronology main fn to run the async logic
 chronological.main(logic)
